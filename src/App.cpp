@@ -96,6 +96,35 @@ int App::InitWindow()
 int App::InitRenderer()
 {
     int success = util::eERR_FAILED;
+    m_renderer = std::make_unique<Renderer>();
+
+    m_renderer->CreateInstance();
+
+
     return success;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
