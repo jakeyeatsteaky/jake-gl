@@ -24,6 +24,11 @@ void print_args(int argc, char** argv, bool print = false)
    }
 }
 
+#if 0
+============================= TODO ==================================
+ [ ] https://vulkan-tutorial.com/en/Drawing_a_triangle/Setup/Validation_layers -- start back up here
+#endif
+
 
 int main(int argc, char** argv)
 {
