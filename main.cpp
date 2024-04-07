@@ -1,7 +1,6 @@
 #define GLFW_INCLUDE_VULKAN
 #include <iostream>
-#include <chrono>
-#include <thread>
+#include <stdexcept>
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
@@ -10,6 +9,8 @@
 #include <glm/mat4x4.hpp>
 
 #include "App.hpp"
+#include "Utility.hpp"
+
 
 void print_args(int argc, char** argv, bool print = false)
 {
@@ -32,15 +33,13 @@ int main(int argc, char** argv)
 
    app.Setup();
 
-   while(app.IsRunning())
-   {
-      app.Input();
-      app.Update();
-      app.Render();
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+   try {
+      app.Run();
+   } catch (const std::exception& e) {
+      std::cerr << e.what() << std::endl;
+      return util::eERR_FAILED;
    }
 
-
-   
+   return util::eERR_SUCCESS;
 
 }
