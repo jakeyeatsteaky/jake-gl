@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <iostream>
 
+#include "Utility.hpp"
+
 // VK_CHECK(vkCreateFunction, "String of Message", Bool print verbose);
 #define VK_CHECK(x, y, z)                                       \
 do                                                              \
@@ -20,15 +22,18 @@ do                                                              \
                 std::cout << "\tSUCCESS: " << y << std::endl;}  \
     } while (0)
 
-
 class Renderer
 {
 private:
     VkInstance m_instance;
+    std::vector<const char*> m_validationLayers;
 
 public:
     Renderer();
     ~Renderer();
+    void AddValidationLayers();
+    bool CheckValidationLayers() const;
+    void GetRequiredExtensions();
     void CheckExtensions(uint32_t* count, bool printInfo = true);
     bool IsInitialized();
     void CreateInstance();

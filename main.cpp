@@ -26,7 +26,8 @@ void print_args(int argc, char** argv, bool print = false)
 
 #if 0
 ============================= TODO ==================================
- [ ] https://vulkan-tutorial.com/en/Drawing_a_triangle/Setup/Validation_layers -- start back up here
+ [ ] https://vulkan-tutorial.com/en/Drawing_a_triangle/Setup/Validation_layers
+    -> Message callback -- start here
 #endif
 
 

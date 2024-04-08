@@ -19,6 +19,7 @@ App::~App()
 
 void App::Run()
 {
+    std::cout << "Starting main loop" << std::endl;
     while(IsRunning())
     {
       Input();
@@ -43,7 +44,7 @@ void App::Setup()
     success = InitRenderer();
 
     if(success < 0)
-        std::cout << "Failed to init renderer" << std::endl;
+        std::cout << "Failed to initialize application" << std::endl;
     
     return;
 
@@ -98,9 +99,17 @@ int App::InitRenderer()
     int success = util::eERR_FAILED;
     m_renderer = std::make_unique<Renderer>();
 
-    m_renderer->CreateInstance();
+    bool validationLayers = false;
+    if(util::DEBUG_BUILD){
+        m_renderer->AddValidationLayers();
+        validationLayers = m_renderer->CheckValidationLayers();
+        m_renderer->GetRequiredExtensions();
+    }
 
+    if(validationLayers || !util::DEBUG_BUILD)
+        m_renderer->CreateInstance();
 
+    success = util::eERR_SUCCESS;
     return success;
 
 }

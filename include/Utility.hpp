@@ -2,8 +2,11 @@
 #define UTILITY_HPP
 #include <GLFW/glfw3.h>
 
+
 namespace util
 {
+    constexpr bool DEBUG_BUILD = 1;
+
     enum
     {
         eERR_FAILED = -1,
