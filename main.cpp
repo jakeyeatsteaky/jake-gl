@@ -25,8 +25,9 @@ void print_args(int argc, char** argv, bool print = false)
 
 #if 0
 ============================= TODO ==================================
- [ ] https://vulkan-tutorial.com/en/Drawing_a_triangle/Setup/Validation_layers
+ [ ] https://vulkan-tutorial.com/en/Drawing_a_triangle/Setup/Physical_devices_and_queue_families
     X-> Message callback -- start here
+    -> Queue Families -- start here
 
  [ ] Log the validation layers and print to console only the important ones.  Right now, every message is being printed to the console
 #endif

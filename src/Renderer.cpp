@@ -7,7 +7,8 @@
 Renderer::Renderer():
     m_instance(NULL),
     m_validationLayers({}),
-    m_extensions({})
+    m_extensions({}),
+    m_physicalDevice(VK_NULL_HANDLE)
 {
 
 }
@@ -15,7 +16,7 @@ Renderer::Renderer():
 Renderer::~Renderer()
 {
     std::cout << "Destroying Renderer: " << std::endl;
-    //DestroyDebugUtilsMessengerEXT(m_instance, nullptr, m_debugMessenger);
+    DestroyDebugUtilsMessengerEXT(m_instance, nullptr, m_debugMessenger);
     std::cout << "\t Destroyed Debug Messenger" << std::endl;
     vkDestroyInstance(m_instance, nullptr);
     std::cout << "\t Destroyed instance" << std::endl;
@@ -163,6 +164,53 @@ void Renderer::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoE
     createInfo.pUserData = nullptr;
 }
 
+VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::DebugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT sev,
+    VkDebugUtilsMessageTypeFlagsEXT type,
+    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    [[maybe_unused]] void* pUserData)
+{
+    // 0x1 Gen, 0x2 validation, 0x4 perf
+    std::string msgType = (type & 0b1) ? "General" : ((type & 0b10) ? "Validation" : ((type & 0b100) ? "Performance" : ""));
+
+    switch(sev)
+    {
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+    {
+        std::cerr << msgType << " Layer (ERROR): " << pCallbackData->pMessage << std::endl;
+        break;
+    }
+
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+    {
+        std::cerr << msgType << " Layer (WARNING): " << pCallbackData->pMessage << std::endl;
+        break;
+    }
+
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+    {
+        std::cerr << msgType << " Layer (VERBOSE): " << pCallbackData->pMessage << std::endl;
+        break;
+    }
+
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+    {
+        std::cerr << msgType << " Layer (INFO): " << pCallbackData->pMessage << std::endl;
+        break;
+    }
+
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
+    {
+        break;
+    }
+
+    default:
+        break;
+    }
+
+    return VK_FALSE;
+}
+
 void Renderer::CheckExtensions(uint32_t* count, bool printInfo)
 {
     std::vector<VkExtensionProperties> ext_props {};
@@ -180,57 +228,97 @@ void Renderer::CheckExtensions(uint32_t* count, bool printInfo)
     }
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::DebugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT sev,
-    VkDebugUtilsMessageTypeFlagsEXT type,
-    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-    [[maybe_unused]] void* pUserData)
+void Renderer::PickPhysicalDevice()
 {
-    // 0x1 Gen, 0x2 validation, 0x4 perf
-    std::string msgType = (type & 0b1) ? "General" : ((type & 0b10) ? "Validation" : ((type & 0b100) ? "Performance" : ""));
+    uint32_t deviceCount = 0;
+    VK_CHECK(vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr), "Get Physical Device Count", true);
 
-    switch(sev)
-    {
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-        {
-           std::cerr << msgType << " Validation Layer (ERROR): " << pCallbackData->pMessage << std::endl;
-            break;
-        }
+    std::vector<VkPhysicalDevice> physical_devices(deviceCount);
+    VK_CHECK(vkEnumeratePhysicalDevices(m_instance, &deviceCount, physical_devices.data()), "Enumerate Physical Devices", true);
 
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-        {
-            std::cerr << msgType << " Validation Layer (WARNING): " << pCallbackData->pMessage << std::endl;
-            break;
-        }
+    VK_CHECK(FindSuitablePhy(physical_devices), "Find a Suitable Phy", true);
 
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-        {
-            std::cerr << msgType << " Validation Layer (VERBOSE): " << pCallbackData->pMessage << std::endl;
-            break;
-        }
 
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-        {
-            std::cerr << msgType << " Validation Layer (INFO): " << pCallbackData->pMessage << std::endl;
-            break;
-        }
 
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
-        {
-            break;
-        }
 
-        default:
-            break;
-    }
-
-    return VK_FALSE;
 }
 
+VkResult Renderer::FindSuitablePhy(const std::vector<VkPhysicalDevice>& physical_devices)
+{
+    VkResult result = VK_NOT_READY;
 
+    for(const auto& device: physical_devices)
+    {
+        if(IsDeviceSuitable(device)){
+            m_physicalDevice = device;
+            result = VK_SUCCESS;
+            break;
+        }
+    }
 
+    return result;
+}
 
+bool Renderer::IsDeviceSuitable(const VkPhysicalDevice& device)
+{
+    bool ret = false;
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    // Specifically use the discrete gpu, the feature is just an example
+
+    ret = (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader);
+    return ret;
+
+    // Idea for picking highest rated GPU
+//      #include <map>
+
+//     ...
+
+//         void pickPhysicalDevice() {
+//         ...
+
+//             // Use an ordered map to automatically sort candidates by increasing score
+//             std::multimap<int, VkPhysicalDevice> candidates;
+
+//         for (const auto& device : devices) {
+//             int score = rateDeviceSuitability(device);
+//             candidates.insert(std::make_pair(score, device));
+//         }
+
+//         // Check if the best candidate is suitable at all
+//         if (candidates.rbegin()->first > 0) {
+//             physicalDevice = candidates.rbegin()->second;
+//         } else {
+//             throw std::runtime_error("failed to find a suitable GPU!");
+//         }
+//     }
+
+//     int rateDeviceSuitability(VkPhysicalDevice device) {
+//         ...
+
+//             int score = 0;
+
+//         // Discrete GPUs have a significant performance advantage
+//         if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+//             score += 1000;
+//         }
+
+//         // Maximum possible size of textures affects graphics quality
+//         score += deviceProperties.limits.maxImageDimension2D;
+
+//         // Application can't function without geometry shaders
+//         if (!deviceFeatures.geometryShader) {
+//             return 0;
+//         }
+
+//         return score;
+//     }
+
+}
 
 
 

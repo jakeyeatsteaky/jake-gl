@@ -113,6 +113,7 @@ int App::InitRenderer()
         m_renderer->SetupDebugMessenger();
     }
 
+    m_renderer->PickPhysicalDevice();
 
     success = util::eERR_SUCCESS;
     return success;

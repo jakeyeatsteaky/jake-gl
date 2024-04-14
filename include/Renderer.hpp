@@ -29,6 +29,10 @@ private:
     std::vector<const char*> m_validationLayers;
     std::vector<const char*> m_extensions;
     VkDebugUtilsMessengerEXT m_debugMessenger;
+    VkPhysicalDevice m_physicalDevice;
+
+    // methods
+    void CheckExtensions(uint32_t* count, bool printInfo = true);
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT sev,
@@ -47,18 +51,21 @@ private:
         const VkAllocationCallbacks* pAllocator,
         VkDebugUtilsMessengerEXT debugMessenger);
 
+    void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+
+    VkResult FindSuitablePhy(const std::vector<VkPhysicalDevice>& physical_devices);
+    bool IsDeviceSuitable(const VkPhysicalDevice& device);
+
 public:
     Renderer();
     ~Renderer();
     void AddValidationLayers();
     bool CheckValidationLayers() const;
     void GetRequiredExtensions();
-    void CheckExtensions(uint32_t* count, bool printInfo = true);
+    void SetupDebugMessenger();
     bool IsInitialized();
     void CreateInstance();
-    void SetupDebugMessenger();
-    void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-
+    void PickPhysicalDevice();
 
 };
 
