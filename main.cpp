@@ -1,6 +1,5 @@
 #define GLFW_INCLUDE_VULKAN
 #include <iostream>
-#include <stdexcept>
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
@@ -27,7 +26,9 @@ void print_args(int argc, char** argv, bool print = false)
 #if 0
 ============================= TODO ==================================
  [ ] https://vulkan-tutorial.com/en/Drawing_a_triangle/Setup/Validation_layers
-    -> Message callback -- start here
+    X-> Message callback -- start here
+
+ [ ] Log the validation layers and print to console only the important ones.  Right now, every message is being printed to the console
 #endif
 
 

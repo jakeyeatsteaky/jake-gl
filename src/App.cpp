@@ -45,7 +45,8 @@ void App::Setup()
 
     if(success < 0)
         std::cout << "Failed to initialize application" << std::endl;
-    
+    else
+        m_isRunning = true;
     return;
 
 }
@@ -107,7 +108,11 @@ int App::InitRenderer()
     }
 
     if(validationLayers || !util::DEBUG_BUILD)
+    {
         m_renderer->CreateInstance();
+        m_renderer->SetupDebugMessenger();
+    }
+
 
     success = util::eERR_SUCCESS;
     return success;

@@ -27,6 +27,25 @@ class Renderer
 private:
     VkInstance m_instance;
     std::vector<const char*> m_validationLayers;
+    std::vector<const char*> m_extensions;
+    VkDebugUtilsMessengerEXT m_debugMessenger;
+
+    static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT sev,
+        VkDebugUtilsMessageTypeFlagsEXT type,
+        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+        void* pUserData);
+
+    VkResult CreateDebugUtilsMessengerEXT(
+                            VkInstance instance,
+                            const VkDebugUtilsMessengerCreateInfoEXT* createInfo,
+                            const VkAllocationCallbacks* pAllocator,
+                            VkDebugUtilsMessengerEXT* pDebugMessenger);
+
+    void DestroyDebugUtilsMessengerEXT(
+        VkInstance instance,
+        const VkAllocationCallbacks* pAllocator,
+        VkDebugUtilsMessengerEXT debugMessenger);
 
 public:
     Renderer();
@@ -37,6 +56,9 @@ public:
     void CheckExtensions(uint32_t* count, bool printInfo = true);
     bool IsInitialized();
     void CreateInstance();
+    void SetupDebugMessenger();
+    void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+
 
 };
 
